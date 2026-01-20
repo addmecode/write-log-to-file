@@ -113,6 +113,8 @@ report 50102 "AMC Customer Purchase Preview"
         DefaultStartDate: Date;
         DefaultEndDate: Date;
     begin
+        if (StartDate <> 0D) and (EndDate <> 0D) then
+            exit;
         GetPreviousMonthRange(DefaultStartDate, DefaultEndDate);
 
         if StartDate = 0D then
