@@ -1,7 +1,6 @@
 codeunit 50109 "AMC Log File Writer"
 {
     var
-        LogFileFormatterMgt: Codeunit "AMC Log File Formatter Mgt";
         TempBlob: Codeunit "Temp Blob";
         Formatter: Interface "AMC Log File Formatter";
         OutStream: OutStream;
@@ -18,7 +17,7 @@ codeunit 50109 "AMC Log File Writer"
         Clear(Formatter);
         Clear(OutStream);
         TempBlob.CreateOutStream(OutStream, TextEncoding::UTF8);
-        Formatter := LogFileFormatterMgt.GetFormatter(Format);
+        Formatter := Format;
         LineSeparator := TypeHelper.NewLine();
         IsInitialized := true;
     end;
