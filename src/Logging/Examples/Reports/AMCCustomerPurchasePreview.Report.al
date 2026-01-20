@@ -102,18 +102,10 @@ report 50102 "AMC Customer Purchase Preview"
     end;
 
     local procedure InitializeRequestDefaults()
-    var
-        DefaultStartDate: Date;
-        DefaultEndDate: Date;
     begin
         PreviewOnly := true;
         LogFormat := LogFormat::Csv;
-        GetPreviousMonthRange(DefaultStartDate, DefaultEndDate);
-
-        if StartDate = 0D then
-            StartDate := DefaultStartDate;
-        if EndDate = 0D then
-            EndDate := DefaultEndDate;
+        GetPreviousMonthRange(StartDate, EndDate);
     end;
 
     local procedure EnsureDateDefaults()
