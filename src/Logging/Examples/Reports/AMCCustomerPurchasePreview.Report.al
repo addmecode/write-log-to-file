@@ -124,17 +124,9 @@ report 50102 "AMC Customer Purchase Preview"
     end;
 
     local procedure GetPreviousMonthRange(var FromDate: Date; var ToDate: Date)
-    var
-        FirstOfThisMonth: Date;
-        Year: Integer;
-        Month: Integer;
     begin
-        Month := Date2DMY(WorkDate(), 2);
-        Year := Date2DMY(WorkDate(), 3);
-        FirstOfThisMonth := DMY2DATE(1, Month, Year);
-
-        ToDate := CalcDate('<-1D>', FirstOfThisMonth);
-        FromDate := DMY2DATE(1, Date2DMY(ToDate, 2), Date2DMY(ToDate, 3));
+        ToDate := CalcDate('<-CM-1D>', WorkDate());
+        FromDate := CalcDate('<-CM>', ToDate);
     end;
 
   local procedure CalculateCustomerAmount(CustomerRecord: Record Customer; FromDate: Date; ToDate: Date): Decimal
