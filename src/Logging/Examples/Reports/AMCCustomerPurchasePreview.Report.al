@@ -143,17 +143,22 @@ report 50102 "AMC Customer Purchase Preview"
         FromDate := DMY2DATE(1, Date2DMY(ToDate, 2), Date2DMY(ToDate, 3));
     end;
 
-    local procedure CalculateCustomerAmount(CustomerRecord: Record Customer; FromDate: Date; ToDate: Date): Decimal
-    var
-        CustLedgerEntry: Record "Cust. Ledger Entry";
-    begin
-        CustLedgerEntry.SetRange("Customer No.", CustomerRecord."No.");
-        CustLedgerEntry.SetRange("Posting Date", FromDate, ToDate);
-        CustLedgerEntry.SetRange("Document Type", CustLedgerEntry."Document Type"::Invoice);
-        CustLedgerEntry.SetLoadFields("Amount (LCY)");
-        CustLedgerEntry.CalcSums("Amount (LCY)");
-        exit(CustLedgerEntry."Amount (LCY)");
-    end;
+  local procedure CalculateCustomerAmount(CustomerRecord: Record Customer; FromDate: Date; ToDate: Date): Decimal
+  var
+    CustLedgerEntry: Record "Cust. Ledger Entry";
+    AmountSum: Decimal;
+  begin
+    CustLedgerEntry.SetRange("Customer No.", CustomerRecord."No.");
+    CustLedgerEntry.SetRange("Posting Date", FromDate, ToDate);
+    CustLedgerEntry.SetRange("Document Type", CustLedgerEntry."Document Type"::Invoice);
+    if CustLedgerEntry.FindSet() then
+      repeat
+        CustLedgerEntry.CalcFields("Amount (LCY)");
+        AmountSum += CustLedgerEntry."Amount (LCY)";
+      until CustLedgerEntry.Next() = 0;
+
+    exit(AmountSum);
+  end;
 
     local procedure HandleCustomer(var CustomerRecord: Record Customer; PurchaseAmount: Decimal)
     var
