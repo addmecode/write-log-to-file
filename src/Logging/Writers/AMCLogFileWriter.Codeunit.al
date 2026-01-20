@@ -7,7 +7,6 @@ codeunit 50109 "AMC Log File Writer"
     OutStream: OutStream;
     IsInitialized: Boolean;
     LineSeparator: Text;
-    NotInitializedErr: Label 'Log file writer is not initialized. Call Initialize before adding lines.';
 
   /// <summary>Initializes the writer with the selected format.</summary>
   /// <param name="Format">Log file format.</param>
@@ -80,6 +79,8 @@ codeunit 50109 "AMC Log File Writer"
   end;
 
   local procedure EnsureInitialized()
+    var
+        NotInitializedErr: Label 'Log file writer is not initialized. Call Initialize before adding lines.';
   begin
     if not IsInitialized then
       Error(NotInitializedErr);
