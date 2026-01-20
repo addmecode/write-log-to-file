@@ -76,7 +76,6 @@ report 50102 "AMC Customer Purchase Preview"
         PreviewOnly: Boolean;
         LogFormat: Enum "AMC Log File Format";
         LogFileWriter: Codeunit "AMC Log File Writer";
-        HeaderWritten: Boolean;
         BlockedCount: Integer;
         LogFileNameLbl: Label 'CustomerPurchasePreview', Locked = true;
         BlockedCustomersMsg: Label 'Blocked %1 customers based on %2 - %3 purchases.', Comment = '%1 = count, %2 = start date, %3 = end date';
@@ -129,22 +128,22 @@ report 50102 "AMC Customer Purchase Preview"
         FromDate := CalcDate('<-CM>', ToDate);
     end;
 
-  local procedure CalculateCustomerAmount(CustomerRecord: Record Customer; FromDate: Date; ToDate: Date): Decimal
-  var
-    CustLedgerEntry: Record "Cust. Ledger Entry";
-    AmountSum: Decimal;
-  begin
-    CustLedgerEntry.SetRange("Customer No.", CustomerRecord."No.");
-    CustLedgerEntry.SetRange("Posting Date", FromDate, ToDate);
-    CustLedgerEntry.SetRange("Document Type", CustLedgerEntry."Document Type"::Invoice);
-    if CustLedgerEntry.FindSet() then
-      repeat
-        CustLedgerEntry.CalcFields("Amount (LCY)");
-        AmountSum += CustLedgerEntry."Amount (LCY)";
-      until CustLedgerEntry.Next() = 0;
+    local procedure CalculateCustomerAmount(CustomerRecord: Record Customer; FromDate: Date; ToDate: Date): Decimal
+    var
+        CustLedgerEntry: Record "Cust. Ledger Entry";
+        AmountSum: Decimal;
+    begin
+        CustLedgerEntry.SetRange("Customer No.", CustomerRecord."No.");
+        CustLedgerEntry.SetRange("Posting Date", FromDate, ToDate);
+        CustLedgerEntry.SetRange("Document Type", CustLedgerEntry."Document Type"::Invoice);
+        if CustLedgerEntry.FindSet() then
+            repeat
+                CustLedgerEntry.CalcFields("Amount (LCY)");
+                AmountSum += CustLedgerEntry."Amount (LCY)";
+            until CustLedgerEntry.Next() = 0;
 
-    exit(AmountSum);
-  end;
+        exit(AmountSum);
+    end;
 
     local procedure HandleCustomer(var CustomerRecord: Record Customer; PurchaseAmount: Decimal)
     var
@@ -171,15 +170,11 @@ report 50102 "AMC Customer Purchase Preview"
     var
         Columns: List of [Text];
     begin
-        if HeaderWritten then
-            exit;
-
         Columns.Add('Customer No.');
         Columns.Add('Customer Name');
         Columns.Add('Amount (LCY)');
         Columns.Add('Start Date');
         Columns.Add('End Date');
         LogFileWriter.AddHeader(Columns);
-        HeaderWritten := true;
     end;
 }
