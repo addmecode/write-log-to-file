@@ -80,7 +80,8 @@ report 50102 "AMC Customer Purchase Preview"
             EnsureDateDefaults();
 
         if PreviewOnly then begin
-            LogFileWriter.Initialize(LogFormat);
+            LogFileFormatter := LogFormat;
+            LogFileFormatter.Initialize('', '');
             AddLogHeader();
         end;
     end;
@@ -91,20 +92,20 @@ report 50102 "AMC Customer Purchase Preview"
         LogFileNameLbl: Label 'CustomerPurchasePreview', Locked = true;
     begin
         if PreviewOnly then
-            LogFileWriter.Download(LogFileNameLbl);
+            LogFileFormatter.Download(LogFileNameLbl);
 
         if (not PreviewOnly) and (BlockedCount > 0) then
             Message(BlockedCustomersMsg, BlockedCount, StartDate, EndDate);
     end;
 
     var
-        LogFileWriter: Codeunit "AMC Log File Writer";
         PreviewOnly: Boolean;
         EndDate: Date;
         StartDate: Date;
         MinAmount: Decimal;
         LogFormat: Enum "AMC Log File Format";
         BlockedCount: Integer;
+        LogFileFormatter: Interface "AMC Log File Formatter";
 
     local procedure EnsureDateDefaults()
     var
@@ -136,7 +137,7 @@ report 50102 "AMC Customer Purchase Preview"
         Columns.Add('Amount (LCY)');
         Columns.Add('Start Date');
         Columns.Add('End Date');
-        LogFileWriter.AddHeader(Columns);
+        LogFileFormatter.AddHeader(Columns);
     end;
 
     local procedure InitializeRequestDefaults()
@@ -173,7 +174,7 @@ report 50102 "AMC Customer Purchase Preview"
             Values.Add(Format(PurchaseAmount));
             Values.Add(Format(StartDate));
             Values.Add(Format(EndDate));
-            LogFileWriter.AddRow(Values);
+            LogFileFormatter.AddRow(Values);
             exit;
         end;
 

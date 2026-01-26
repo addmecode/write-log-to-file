@@ -1,24 +1,84 @@
 codeunit 50111 "AMC Text Log File Formatter" implements "AMC Log File Formatter"
 {
-    /// <summary>Formats the header row as plain text.</summary>
+    var
+        StreamHelper: Codeunit "AMC Log File Stream Helper";
+        GlobalDelimiter: Text;
+
+    /// <summary>Initializes the formatter for writing a text log file.</summary>
+    /// <param name="NewLineCharacter">New line character(s) to use between lines.</param>
+    /// <param name="Delimiter">Delimiter to use for text output.</param>
+    procedure Initialize(NewLineCharacter: Text; Delimiter: Text)
+    begin
+        this.StreamHelper.Initialize(NewLineCharacter);
+        this.SetDelimiter(Delimiter);
+    end;
+
+    local procedure SetDelimiter(Delimiter: Text)
+    begin
+        if Delimiter <> '' then
+            this.GlobalDelimiter := Delimiter
+        else
+            this.GlobalDelimiter := this.GetDefaultDelimiter();
+    end;
+
+    local procedure GetDefaultDelimiter(): Text
+    begin
+        exit('|');
+    end;
+
+    /// <summary>Writes a text header row.</summary>
     /// <param name="Columns">Column captions.</param>
-    /// <returns>The header line.</returns>
-    procedure FormatHeader(Columns: List of [Text]): Text
+    procedure AddHeader(Columns: List of [Text])
     begin
-        exit(JoinValues(Columns));
+        this.StreamHelper.WriteTextWithNewLine(this.FormatHeader(Columns));
     end;
 
-    /// <summary>Formats a data row as plain text.</summary>
+    /// <summary>Writes a text data row.</summary>
     /// <param name="Values">Values to write.</param>
-    /// <returns>The row line.</returns>
-    procedure FormatRow(Values: List of [Text]): Text
+    procedure AddRow(Values: List of [Text])
     begin
-        exit(JoinValues(Values));
+        this.StreamHelper.WriteTextWithNewLine(this.FormatRow(Values));
     end;
 
-    /// <summary>Gets the TXT file extension.</summary>
-    /// <returns>File extension.</returns>
-    procedure GetFileExtension(): Text
+    /// <summary>Writes raw text followed by a new line.</summary>
+    /// <param name="LineText">Line text to write.</param>
+    procedure AddPlaneTextWithNewLine(LineText: Text)
+    begin
+        this.StreamHelper.WriteTextWithNewLine(LineText);
+    end;
+
+    /// <summary>Writes raw text without a trailing new line.</summary>
+    /// <param name="LineText">Line text to write.</param>
+    procedure AddPlaneTextWithoutNewLine(LineText: Text)
+    begin
+        this.StreamHelper.WriteTextWithoutNewLine(LineText);
+    end;
+
+    /// <summary>Downloads the text file to the user.</summary>
+    /// <param name="FileName">File name without extension or with a custom extension.</param>
+    procedure Download(FileName: Text)
+    begin
+        this.StreamHelper.Download(FileName, this.GetFileExtension());
+    end;
+
+    /// <summary>Creates an instream with the current text content.</summary>
+    /// <param name="InStream">Resulting instream.</param>
+    procedure CreateInStream(var InStream: InStream)
+    begin
+        this.StreamHelper.CreateInStream(InStream);
+    end;
+
+    local procedure FormatHeader(Columns: List of [Text]): Text
+    begin
+        exit(this.JoinValues(Columns));
+    end;
+
+    local procedure FormatRow(Values: List of [Text]): Text
+    begin
+        exit(this.JoinValues(Values));
+    end;
+
+    local procedure GetFileExtension(): Text
     begin
         exit('txt');
     end;
@@ -27,14 +87,12 @@ codeunit 50111 "AMC Text Log File Formatter" implements "AMC Log File Formatter"
     var
         First: Boolean;
         Result: Text;
-        Separator: Text;
         Value: Text;
     begin
-        Separator := ' | ';
         First := true;
         foreach Value in Values do begin
             if not First then
-                Result += Separator;
+                Result += this.GlobalDelimiter;
             Result += Value;
             First := false;
         end;

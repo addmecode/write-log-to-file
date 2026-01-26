@@ -1,16 +1,31 @@
 interface "AMC Log File Formatter"
 {
-    /// <summary>Formats the header row for a log file.</summary>
+    /// <summary>Initializes the formatter for writing a log file.</summary>
+    /// <param name="NewLineCharacter">New line character(s) to use between lines.</param>
+    /// <param name="Delimiter">Delimiter used by the formatter when applicable.</param>
+    procedure Initialize(NewLineCharacter: Text; Delimiter: Text)
+
+    /// <summary>Writes a header row using the formatter.</summary>
     /// <param name="Columns">Column captions.</param>
-    /// <returns>The formatted header line.</returns>
-    procedure FormatHeader(Columns: List of [Text]): Text
+    procedure AddHeader(Columns: List of [Text])
 
-    /// <summary>Formats a data row for a log file.</summary>
+    /// <summary>Writes a data row using the formatter.</summary>
     /// <param name="Values">Values to write.</param>
-    /// <returns>The formatted row line.</returns>
-    procedure FormatRow(Values: List of [Text]): Text
+    procedure AddRow(Values: List of [Text])
 
-    /// <summary>Gets the file extension without a dot.</summary>
-    /// <returns>The file extension.</returns>
-    procedure GetFileExtension(): Text
+    /// <summary>Writes raw text followed by a new line.</summary>
+    /// <param name="LineText">Line text to write.</param>
+    procedure AddPlaneTextWithNewLine(LineText: Text)
+
+    /// <summary>Writes raw text without a trailing new line.</summary>
+    /// <param name="LineText">Line text to write.</param>
+    procedure AddPlaneTextWithoutNewLine(LineText: Text)
+
+    /// <summary>Downloads the file to the user with the formatter's extension.</summary>
+    /// <param name="FileName">File name without extension or with a custom extension.</param>
+    procedure Download(FileName: Text)
+
+    /// <summary>Creates an instream with the current file content.</summary>
+    /// <param name="InStream">Resulting instream.</param>
+    procedure CreateInStream(var InStream: InStream)
 }
