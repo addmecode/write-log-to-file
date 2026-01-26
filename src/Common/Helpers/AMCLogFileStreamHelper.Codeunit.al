@@ -64,8 +64,7 @@ codeunit 50112 "AMC Log File Stream Helper"
         InStream: InStream;
         FullFileName: Text;
     begin
-        this.EnsureInitialized();
-        this.TempBlob.CreateInStream(InStream, TextEncoding::UTF8);
+        this.CreateInStream(InStream);
         FullFileName := this.EnsureExtension(FileName, Extension);
         DownloadFromStream(InStream, '', '', '', FullFileName);
     end;
