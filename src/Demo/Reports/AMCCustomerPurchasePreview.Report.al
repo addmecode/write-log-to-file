@@ -1,9 +1,9 @@
 report 50102 "AMC Customer Purchase Preview"
 {
-    Caption = 'Customer Purchase Preview';
     ApplicationArea = All;
-    UsageCategory = ReportsAndAnalysis;
+    Caption = 'Customer Purchase Preview';
     ProcessingOnly = true;
+    UsageCategory = ReportsAndAnalysis;
 
     dataset
     {
@@ -29,34 +29,39 @@ report 50102 "AMC Customer Purchase Preview"
     {
         layout
         {
-            area(content)
+            area(Content)
             {
                 group(Options)
                 {
-                    field(StartDate; StartDate)
+                    field(StartDateField; StartDate)
                     {
                         ApplicationArea = All;
                         Caption = 'Start Date';
+                        ToolTip = 'Specifies the value of the Start Date field.';
                     }
-                    field(EndDate; EndDate)
+                    field(EndDateField; EndDate)
                     {
                         ApplicationArea = All;
                         Caption = 'End Date';
+                        ToolTip = 'Specifies the value of the End Date field.';
                     }
-                    field(MinAmount; MinAmount)
+                    field(MinAmountField; MinAmount)
                     {
                         ApplicationArea = All;
                         Caption = 'Minimum Amount';
+                        ToolTip = 'Specifies the value of the Minimum Amount field.';
                     }
-                    field(PreviewOnly; PreviewOnly)
+                    field(PreviewOnlyField; PreviewOnly)
                     {
                         ApplicationArea = All;
                         Caption = 'Preview Only';
+                        ToolTip = 'Specifies the value of the Preview Only field.';
                     }
-                    field(LogFormat; LogFormat)
+                    field(LogFormatField; LogFormat)
                     {
                         ApplicationArea = All;
                         Caption = 'Log Format';
+                        ToolTip = 'Specifies the value of the Log Format field.';
                         Visible = PreviewOnly;
                     }
                 }
@@ -68,17 +73,6 @@ report 50102 "AMC Customer Purchase Preview"
             InitializeRequestDefaults();
         end;
     }
-
-    var
-        StartDate: Date;
-        EndDate: Date;
-        MinAmount: Decimal;
-        PreviewOnly: Boolean;
-        LogFormat: Enum "AMC Log File Format";
-        LogFileWriter: Codeunit "AMC Log File Writer";
-        BlockedCount: Integer;
-        LogFileNameLbl: Label 'CustomerPurchasePreview', Locked = true;
-        BlockedCustomersMsg: Label 'Blocked %1 customers based on %2 - %3 purchases.', Comment = '%1 = count, %2 = start date, %3 = end date';
 
     trigger OnPreReport()
     begin
@@ -92,6 +86,9 @@ report 50102 "AMC Customer Purchase Preview"
     end;
 
     trigger OnPostReport()
+    var
+        BlockedCustomersMsg: Label 'Blocked %1 customers based on %2 - %3 purchases.', Comment = '%1 = count, %2 = start date, %3 = end date';
+        LogFileNameLbl: Label 'CustomerPurchasePreview', Locked = true;
     begin
         if PreviewOnly then
             LogFileWriter.Download(LogFileNameLbl);
@@ -100,17 +97,19 @@ report 50102 "AMC Customer Purchase Preview"
             Message(BlockedCustomersMsg, BlockedCount, StartDate, EndDate);
     end;
 
-    local procedure InitializeRequestDefaults()
-    begin
-        PreviewOnly := true;
-        LogFormat := LogFormat::Csv;
-        GetPreviousMonthRange(StartDate, EndDate);
-    end;
+    var
+        LogFileWriter: Codeunit "AMC Log File Writer";
+        PreviewOnly: Boolean;
+        EndDate: Date;
+        StartDate: Date;
+        MinAmount: Decimal;
+        LogFormat: Enum "AMC Log File Format";
+        BlockedCount: Integer;
 
     local procedure EnsureDateDefaults()
     var
-        DefaultStartDate: Date;
         DefaultEndDate: Date;
+        DefaultStartDate: Date;
     begin
         if (StartDate <> 0D) and (EndDate <> 0D) then
             exit;
@@ -128,6 +127,25 @@ report 50102 "AMC Customer Purchase Preview"
         FromDate := CalcDate('<-CM>', ToDate);
     end;
 
+    local procedure AddLogHeader()
+    var
+        Columns: List of [Text];
+    begin
+        Columns.Add('Customer No.');
+        Columns.Add('Customer Name');
+        Columns.Add('Amount (LCY)');
+        Columns.Add('Start Date');
+        Columns.Add('End Date');
+        LogFileWriter.AddHeader(Columns);
+    end;
+
+    local procedure InitializeRequestDefaults()
+    begin
+        PreviewOnly := true;
+        LogFormat := LogFormat::Csv;
+        GetPreviousMonthRange(StartDate, EndDate);
+    end;
+
     local procedure CalculateCustomerAmount(CustomerRecord: Record Customer; FromDate: Date; ToDate: Date): Decimal
     var
         CustLedgerEntry: Record "Cust. Ledger Entry";
@@ -136,9 +154,9 @@ report 50102 "AMC Customer Purchase Preview"
         CustLedgerEntry.SetRange("Customer No.", CustomerRecord."No.");
         CustLedgerEntry.SetRange("Posting Date", FromDate, ToDate);
         CustLedgerEntry.SetRange("Document Type", CustLedgerEntry."Document Type"::Invoice);
+        CustLedgerEntry.SetAutoCalcFields("Amount (LCY)");
         if CustLedgerEntry.FindSet() then
             repeat
-                CustLedgerEntry.CalcFields("Amount (LCY)");
                 AmountSum += CustLedgerEntry."Amount (LCY)";
             until CustLedgerEntry.Next() = 0;
 
@@ -164,17 +182,5 @@ report 50102 "AMC Customer Purchase Preview"
             CustomerRecord.Modify(true);
             BlockedCount += 1;
         end;
-    end;
-
-    local procedure AddLogHeader()
-    var
-        Columns: List of [Text];
-    begin
-        Columns.Add('Customer No.');
-        Columns.Add('Customer Name');
-        Columns.Add('Amount (LCY)');
-        Columns.Add('Start Date');
-        Columns.Add('End Date');
-        LogFileWriter.AddHeader(Columns);
     end;
 }

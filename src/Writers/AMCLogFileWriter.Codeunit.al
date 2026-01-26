@@ -2,9 +2,9 @@ codeunit 50109 "AMC Log File Writer"
 {
     var
         TempBlob: Codeunit "Temp Blob";
+        IsInitialized: Boolean;
         Formatter: Interface "AMC Log File Formatter";
         OutStream: OutStream;
-        IsInitialized: Boolean;
         LineSeparator: Text;
 
     /// <summary>Initializes the writer with the selected format.</summary>

@@ -25,10 +25,10 @@ codeunit 50110 "AMC Csv Log File Formatter" implements "AMC Log File Formatter"
 
     local procedure FormatValues(Values: List of [Text]): Text
     var
-        Value: Text;
-        Result: Text;
-        Delimiter: Text[1];
         First: Boolean;
+        Result: Text;
+        Value: Text;
+        Delimiter: Text[1];
     begin
         Delimiter := GetDelimiter();
         First := true;
