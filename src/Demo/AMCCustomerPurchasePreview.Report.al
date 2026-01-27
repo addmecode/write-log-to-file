@@ -62,7 +62,7 @@ report 50102 "AMC Customer Purchase Preview"
                         ApplicationArea = All;
                         Caption = 'Log Format';
                         ToolTip = 'Specifies the value of the Log Format field.';
-                        Visible = PreviewOnly;
+                        Enabled = PreviewOnly;
                     }
                 }
             }
