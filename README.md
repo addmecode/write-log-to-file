@@ -1,4 +1,4 @@
-# Log To File
+# Write Log To File
 This extension allows you to generate log file in csv or txt formats with easy extensibility through an interface.
 \
 \
